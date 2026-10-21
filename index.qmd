@@ -1,0 +1,87 @@
+
+---
+title: "Análisis estadístico del crecimiento de la piña"
+subtitle: "Evaluación de sólidos solubles (°Brix)"
+author: "Nilver Mego"
+lang: es
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: "Contenido"
+    number-sections: true
+execute:
+  warning: false
+  message: false
+---
+
+# Introducción
+
+El presente análisis evalúa los sólidos solubles, expresados en grados Brix, de frutos de piña bajo diferentes combinaciones de boro y potasio. Se utiliza un diseño de bloques completos al azar con siete tratamientos y cuatro bloques.
+
+# Objetivo
+
+Evaluar si existen diferencias en el promedio de °Brix entre los tratamientos aplicados.
+
+# Modelo estadístico empleado
+
+Se considera el modelo:
+
+\[
+Y_{ij}=\mu+\tau_i+\beta_j+\varepsilon_{ij}
+\]
+
+Donde \(Y_{ij}\) representa el °Brix promedio del tratamiento \(i\) en el bloque \(j\), \(\mu\) es la media general, \(\tau_i\) es el efecto del tratamiento, \(\beta_j\) es el efecto del bloque y \(\varepsilon_{ij}\) es el error experimental.
+
+# Preparación de los datos
+
+```{r}
+library(ggplot2)
+
+datos <- read.csv("datos_brix_organizados.csv")
+
+datos$Tratamiento <- factor(datos$Tratamiento)
+datos$Bloque <- factor(datos$Bloque)
+
+head(datos)
+```
+
+# Análisis de varianza (ANOVA)
+
+Se evalúa la hipótesis nula de igualdad de medias entre los siete tratamientos, considerando los bloques en el modelo.
+
+```{r}
+modelo <- aov(Brix_promedio ~ Tratamiento + Bloque, data = datos)
+
+summary(modelo)
+```
+
+# Comparación de medias
+
+La prueba de Tukey permite identificar qué pares de tratamientos presentan diferencias estadísticamente significativas.
+
+```{r}
+TukeyHSD(modelo, "Tratamiento")
+```
+
+# Gráfica de resultados
+
+```{r}
+ggplot(datos, aes(x = Tratamiento, y = Brix_promedio)) +
+  stat_summary(fun = mean, geom = "col", fill = "steelblue") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(
+    title = "Promedio de sólidos solubles por tratamiento",
+    x = "Tratamiento",
+    y = "Sólidos solubles (°Brix)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Interpretación y conclusión
+
+Los resultados del ANOVA permitirán determinar si el tratamiento influye significativamente en los sólidos solubles de la piña. Si el valor p del tratamiento es menor que 0,05, se rechazará la hipótesis de igualdad de medias. La prueba de Tukey permitirá precisar entre qué tratamientos se encuentran las diferencias.
+
+Las conclusiones definitivas deben redactarse a partir de los resultados obtenidos al ejecutar el análisis.
+
